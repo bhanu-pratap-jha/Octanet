@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ayura Task Manager</title>
+  <link rel="stylesheet" type="text/css" href="public\styles.css">
+</head>
+<body>
+  <h1>Ayura Task Manager</h1>
+  <div id="task-form">
+    <input type="text" id="task" placeholder="Enter your task">
+    <input type="date" id="deadline">
+    <select id="priority">
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+    <input type="text" id="labels" placeholder="Labels (comma separated)">
+    <button onclick="addTask()">Add Task</button>
+  </div>
+  <ul id="task-list">
+    <!-- Tasks will be dynamically added here -->
+  </ul>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    function addTask() {
+      const task = document.getElementById("task").value;
+      const deadline = document.getElementById("deadline").value;
+      const priority = document.getElementById("priority").value;
+      const labels = document.getElementById("labels").value.split(",");
+      
+      socket.emit("addTask", { task, deadline, priority, labels });
+    }
+
+    socket.on("taskAdded", (taskData) => {
+      const taskList = document.getElementById("task-list");
+      const taskItem = document.createElement("li");
+      taskItem.innerHTML = `
+        <strong>${taskData.task}</strong><br>
+        Deadline: ${taskData.deadline}<br>
+        Priority: ${taskData.priority}<br>
+        Labels: ${taskData.labels.join(", ")}
+      `;
+      taskList.appendChild(taskItem);
+    });
+  </script>
+</body>
+</html>
